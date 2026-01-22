@@ -90,7 +90,7 @@ const EventCard: React.FC<{
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        {new Date(event.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        {new Date(event.dateTime).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
       </div>
       <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors leading-tight">
         {event.title}
@@ -161,15 +161,15 @@ const Home: React.FC<{
         <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-400 rounded-full blur-3xl opacity-50"></div>
         <div className="relative z-10">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Discover What's Happening</h2>
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Discover Events in SA</h2>
           <p className="text-lg text-indigo-100 max-w-2xl mx-auto mb-8">
-            Experience the best local events curated just for you using cutting-edge AI.
+            Experience the best local South African events curated just for you using cutting-edge AI.
           </p>
           <div className="max-w-xl mx-auto flex gap-2">
             <div className="flex-1 relative">
               <input 
                 type="text" 
-                placeholder="Search tech, music, yoga..." 
+                placeholder="Search braais, summits, jazz..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full px-6 py-4 rounded-2xl text-slate-800 shadow-xl focus:ring-4 focus:ring-indigo-300 outline-none"
@@ -217,7 +217,7 @@ const Home: React.FC<{
             </div>
           ) : (
             <div className="bg-white border border-dashed border-slate-300 p-12 rounded-3xl text-center">
-              <p className="text-slate-500">Add more interests or interact with events to get better recommendations!</p>
+              <p className="text-slate-500">Add more interests or interact with local events to get better recommendations!</p>
             </div>
           )}
         </section>
@@ -244,7 +244,7 @@ const Home: React.FC<{
 
       {/* Main Events Grid */}
       <section>
-        <h3 className="text-2xl font-bold text-slate-800 mb-8">Nearby Events</h3>
+        <h3 className="text-2xl font-bold text-slate-800 mb-8">What's Near You</h3>
         {filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredEvents.map(event => (
@@ -441,10 +441,10 @@ const App: React.FC = () => {
   const handleLogin = () => {
     const mockUser: User = {
       id: 'u1',
-      name: 'Alex Developer',
-      email: 'alex@example.com',
-      location: 'San Francisco, CA',
-      interests: ['Tech', 'Business'],
+      name: 'Thabo Mbeki',
+      email: 'thabo@localpulse.co.za',
+      location: 'Johannesburg, Gauteng',
+      interests: ['Tech', 'Music', 'Food'],
       savedEvents: [],
       interactions: []
     };
@@ -505,7 +505,6 @@ const App: React.FC = () => {
       />
       
       <main className="animate-in fade-in duration-500">
-        {/* Fix: Refactored the conditional rendering to avoid calling setView during render and to fix the type error */}
         {view === 'Home' || !user ? (
           <Home 
             user={user} 
@@ -525,7 +524,7 @@ const App: React.FC = () => {
 
       <footer className="mt-20 py-12 border-t border-slate-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-slate-400 text-sm">© 2024 EventPulse AI. Built with Gemini Pro. Built for discovery.</p>
+          <p className="text-slate-400 text-sm">© 2026 TBangCode Solution South Africa</p>
         </div>
       </footer>
     </div>
