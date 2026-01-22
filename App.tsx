@@ -62,7 +62,8 @@ const EventCard: React.FC<{
   isSaved: boolean;
   isAI?: boolean;
   aiReason?: string;
-}> = ({ event, onView, onSave, isSaved, isAI, aiReason }) => (
+  aiConfidence?: number;
+}> = ({ event, onView, onSave, isSaved, isAI, aiReason, aiConfidence }) => (
   <div className={`group relative bg-white rounded-2xl border ${isAI ? 'border-indigo-200 shadow-indigo-50 shadow-xl' : 'border-slate-200 shadow-sm'} overflow-hidden hover:shadow-lg transition-all duration-300`}>
     <div className="relative h-48 overflow-hidden">
       <img 
@@ -76,7 +77,7 @@ const EventCard: React.FC<{
         </span>
       </div>
       <button 
-        onClick={() => onSave(event.id)}
+        onClick={(e) => { e.stopPropagation(); onSave(event.id); }}
         className={`absolute top-4 right-4 p-2 rounded-full backdrop-blur-md transition-all ${isSaved ? 'bg-rose-500 text-white' : 'bg-white/80 text-slate-600 hover:bg-white'}`}
       >
         <svg className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -107,9 +108,21 @@ const EventCard: React.FC<{
         <div className="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
           <div className="flex items-start gap-2">
             <span className="text-lg">✨</span>
-            <p className="text-xs text-indigo-800 leading-relaxed font-medium">
-              {aiReason}
-            </p>
+            <div className="flex-1">
+              <p className="text-xs text-indigo-800 leading-relaxed font-medium">
+                {aiReason}
+              </p>
+              {aiConfidence !== undefined && (
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="h-1 flex-1 bg-indigo-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-600" style={{ width: `${aiConfidence * 100}%` }}></div>
+                  </div>
+                  <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-tighter">
+                    {(aiConfidence * 100).toFixed(0)}% Confidence
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -135,23 +148,26 @@ const Home: React.FC<{
 }> = ({ user, events, recommendations, onInteract, isLoadingRecs }) => {
   const [filter, setFilter] = useState<Category | 'All'>('All');
   const [search, setSearch] = useState('');
+  const [locSearch, setLocSearch] = useState('');
 
   const filteredEvents = useMemo(() => {
     return events.filter(e => {
       const matchCat = filter === 'All' || e.category === filter;
       const matchSearch = e.title.toLowerCase().includes(search.toLowerCase()) || 
                           e.description.toLowerCase().includes(search.toLowerCase());
-      return matchCat && matchSearch;
+      const matchLoc = e.location.toLowerCase().includes(locSearch.toLowerCase());
+      return matchCat && matchSearch && matchLoc;
     });
-  }, [events, filter, search]);
+  }, [events, filter, search, locSearch]);
 
   const recommendedEvents = useMemo(() => {
     return recommendations
       .map(rec => ({
         event: events.find(e => e.id === rec.eventId),
-        reason: rec.reason
+        reason: rec.reason,
+        confidence: rec.confidenceScore
       }))
-      .filter(item => item.event !== undefined) as { event: Event; reason: string }[];
+      .filter(item => item.event !== undefined) as { event: Event; reason: string; confidence: number }[];
   }, [recommendations, events]);
 
   return (
@@ -165,7 +181,7 @@ const Home: React.FC<{
           <p className="text-lg text-indigo-100 max-w-2xl mx-auto mb-8">
             Experience the best local South African events curated just for you using cutting-edge AI.
           </p>
-          <div className="max-w-xl mx-auto flex gap-2">
+          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <input 
                 type="text" 
@@ -176,6 +192,18 @@ const Home: React.FC<{
               />
               <svg className="absolute right-4 top-4 w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div className="sm:w-1/3 relative">
+              <input 
+                type="text" 
+                placeholder="Anywhere in SA" 
+                value={locSearch}
+                onChange={(e) => setLocSearch(e.target.value)}
+                className="w-full px-6 py-4 rounded-2xl text-slate-800 shadow-xl focus:ring-4 focus:ring-indigo-300 outline-none"
+              />
+              <svg className="absolute right-4 top-4 w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               </svg>
             </div>
           </div>
@@ -203,7 +231,7 @@ const Home: React.FC<{
             </div>
           ) : recommendedEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recommendedEvents.map(({ event, reason }) => (
+              {recommendedEvents.map(({ event, reason, confidence }) => (
                 <EventCard 
                   key={`rec-${event.id}`} 
                   event={event} 
@@ -212,6 +240,7 @@ const Home: React.FC<{
                   isSaved={user.savedEvents.includes(event.id)}
                   isAI
                   aiReason={reason}
+                  aiConfidence={confidence}
                 />
               ))}
             </div>
@@ -262,13 +291,103 @@ const Home: React.FC<{
             <svg className="w-16 h-16 text-slate-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.054.585l-1.335 1.335a1 1 0 01-1.66-.707V15a2 2 0 012-2h.001l.89-.89a2 2 0 011.414-.586h1.226a2 2 0 001.414-.586l.89-.89H9a2 2 0 012-2v-.001l.89-.89a2 2 0 011.414-.586h1.226a2 2 0 001.414-.586l.89-.89H17a2 2 0 012 2v2a2 2 0 01-2 2h-1.226a2 2 0 00-1.414.586l-.89.89H14a2 2 0 01-2 2v2a2 2 0 012 2h1.226a2 2 0 001.414-.586l.89-.89H17a2 2 0 012-2v2a2 2 0 01-2 2h-1.226a2 2 0 00-1.414.586l-.89.89h1.226a2 2 0 011.414.586l.89.89z" />
             </svg>
-            <p className="text-slate-500 font-medium">No events found in this category.</p>
+            <p className="text-slate-500 font-medium">No events found in this category or location.</p>
           </div>
         )}
       </section>
     </div>
   );
 };
+
+const EventDetail: React.FC<{
+  event: Event;
+  onBack: () => void;
+  onSave: (id: string) => void;
+  isSaved: boolean;
+}> = ({ event, onBack, onSave, isSaved }) => (
+  <div className="max-w-4xl mx-auto px-4 py-12">
+    <button onClick={onBack} className="flex items-center gap-2 text-indigo-600 font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Back to Search
+    </button>
+    <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100">
+      <div className="h-96 relative">
+        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+          <div>
+            <span className="inline-block bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+              {event.category}
+            </span>
+            <h2 className="text-4xl font-extrabold text-white leading-tight">{event.title}</h2>
+          </div>
+        </div>
+      </div>
+      <div className="p-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-bold text-slate-800 mb-4">About this Event</h3>
+            <p className="text-slate-600 leading-relaxed text-lg mb-8">{event.description}</p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => onSave(event.id)}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold transition-all ${isSaved ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+              >
+                <svg className="w-6 h-6" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                {isSaved ? 'Event Saved' : 'Save for Later'}
+              </button>
+              <button className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all">
+                Get Tickets
+              </button>
+            </div>
+          </div>
+          <div className="space-y-8">
+            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Details</p>
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium">When</p>
+                    <p className="font-bold text-slate-800">{new Date(event.dateTime).toLocaleDateString('en-ZA', { dateStyle: 'full' })}</p>
+                    <p className="text-slate-500">{new Date(event.dateTime).toLocaleTimeString('en-ZA', { timeStyle: 'short' })}</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium">Where</p>
+                    <p className="font-bold text-slate-800">{event.location}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Organizer</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-slate-800 text-white rounded-full flex items-center justify-center font-bold">
+                  {event.organizer.charAt(0)}
+                </div>
+                <p className="font-bold text-slate-800">{event.organizer}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const Dashboard: React.FC<{
   user: User;
@@ -383,7 +502,7 @@ const Dashboard: React.FC<{
                     </div>
                     <div>
                       <p className="font-semibold text-slate-800 line-clamp-1">Event #{id}</p>
-                      <p className="text-xs text-slate-400">Viewed by you recently</p>
+                      <p className="text-xs text-slate-400">Saved by you</p>
                     </div>
                   </li>
                 ))}
@@ -403,11 +522,12 @@ const Dashboard: React.FC<{
 // --- Main App Component ---
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'Home' | 'Dashboard'>('Home');
+  const [view, setView] = useState<'Home' | 'Dashboard' | 'Detail'>('Home');
   const [user, setUser] = useState<User | null>(null);
   const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   // Initialize data from localStorage
   useEffect(() => {
@@ -422,6 +542,13 @@ const App: React.FC = () => {
     if (user) localStorage.setItem('pulse_user', JSON.stringify(user));
     localStorage.setItem('pulse_events', JSON.stringify(events));
   }, [user, events]);
+
+  // Handle case where view is 'Detail' but no event is selected
+  useEffect(() => {
+    if (view === 'Detail' && !selectedEventId) {
+      setView('Home');
+    }
+  }, [view, selectedEventId]);
 
   // AI Recommendation Logic
   const fetchRecommendations = useCallback(async () => {
@@ -455,6 +582,7 @@ const App: React.FC = () => {
     setUser(null);
     localStorage.removeItem('pulse_user');
     setView('Home');
+    setSelectedEventId(null);
   };
 
   const handleInteraction = (eventId: string, type: 'view' | 'save' | 'share') => {
@@ -463,6 +591,11 @@ const App: React.FC = () => {
       return;
     }
     
+    if (type === 'view') {
+      setSelectedEventId(eventId);
+      setView('Detail');
+    }
+
     const newInteraction: UserInteraction = { eventId, type, timestamp: Date.now() };
     const updatedSaved = type === 'save' 
       ? user.savedEvents.includes(eventId)
@@ -494,14 +627,16 @@ const App: React.FC = () => {
     setEvents([newEvent, ...events]);
   };
 
+  const selectedEvent = useMemo(() => events.find(e => e.id === selectedEventId), [events, selectedEventId]);
+
   return (
     <div className="min-h-screen pb-20">
       <Navbar 
         user={user} 
         onLogout={handleLogout} 
         onLoginClick={handleLogin}
-        onDashboardClick={() => setView('Dashboard')}
-        onHomeClick={() => setView('Home')}
+        onDashboardClick={() => { setView('Dashboard'); setSelectedEventId(null); }}
+        onHomeClick={() => { setView('Home'); setSelectedEventId(null); }}
       />
       
       <main className="animate-in fade-in duration-500">
@@ -513,12 +648,21 @@ const App: React.FC = () => {
             onInteract={handleInteraction}
             isLoadingRecs={isLoadingRecs}
           />
-        ) : (
+        ) : view === 'Dashboard' ? (
           <Dashboard 
             user={user} 
             onUpdateInterests={handleUpdateInterests} 
             onAddEvent={handleAddEvent}
           />
+        ) : selectedEvent ? (
+          <EventDetail 
+            event={selectedEvent}
+            onBack={() => setView('Home')}
+            onSave={(id) => handleInteraction(id, 'save')}
+            isSaved={user.savedEvents.includes(selectedEvent.id)}
+          />
+        ) : (
+          null
         )}
       </main>
 

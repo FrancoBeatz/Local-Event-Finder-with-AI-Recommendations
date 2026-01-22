@@ -31,7 +31,8 @@ export const getAIRecommendations = async (user: User, events: Event[]): Promise
     For each recommendation:
     1. Identify why it's a good fit based on their specific interests or past behavior.
     2. Write a warm, human-like explanation.
-    3. Assign a match score between 0 and 1.
+    3. Assign a match score between 0 and 1 (how well it fits user).
+    4. Assign a confidence score between 0 and 1 (how sure you are about this recommendation).
 
     Explain clearly and avoid sounding robotic.
   `;
@@ -49,9 +50,10 @@ export const getAIRecommendations = async (user: User, events: Event[]): Promise
             properties: {
               eventId: { type: Type.STRING },
               reason: { type: Type.STRING },
-              matchScore: { type: Type.NUMBER }
+              matchScore: { type: Type.NUMBER },
+              confidenceScore: { type: Type.NUMBER }
             },
-            required: ["eventId", "reason", "matchScore"]
+            required: ["eventId", "reason", "matchScore", "confidenceScore"]
           }
         }
       }

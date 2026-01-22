@@ -33,6 +33,7 @@ export interface Recommendation {
   eventId: string;
   reason: string;
   matchScore: number;
+  confidenceScore: number;
 }
 
 export interface AuthState {
