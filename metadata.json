@@ -1,0 +1,7 @@
+{
+  "name": "Local Event Finder with AI Recommendations",
+  "description": "A high-performance event discovery platform using Gemini AI to provide personalized event suggestions based on user interests, location, and past behavior. Features full authentication, CRUD operations for events, and a sophisticated recommendation engine.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
