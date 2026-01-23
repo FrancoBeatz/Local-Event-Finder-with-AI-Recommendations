@@ -8,10 +8,10 @@ export const EVENT_CATEGORIES: Category[] = [
 export const MOCK_EVENTS = [
   {
     id: '1',
-    title: 'Cape Town Tech Summit 2024',
+    title: 'Cape Town Tech Summit 2025',
     description: 'The premier gathering for innovators in the Silicon Cape. Networking, keynote speakers, and startup pitches.',
     location: 'V&A Waterfront, Cape Town',
-    dateTime: '2024-06-15T09:00:00',
+    dateTime: '2025-06-15T09:00:00',
     category: 'Tech' as const,
     organizer: 'Silicon Cape Initiative',
     organizerId: 'admin1',
@@ -22,7 +22,7 @@ export const MOCK_EVENTS = [
     title: 'Jazz on the Promenade',
     description: 'Enjoy sunset rhythms with local jazz legends at the Sea Point Promenade. Family friendly and free entry.',
     location: 'Sea Point, Cape Town',
-    dateTime: '2024-05-25T17:30:00',
+    dateTime: '2025-08-25T17:30:00',
     category: 'Music' as const,
     organizer: 'Cape Town Arts Council',
     organizerId: 'admin2',
@@ -30,10 +30,10 @@ export const MOCK_EVENTS = [
   },
   {
     id: '3',
-    title: 'Johannesburg Business Networking Breakfast',
+    title: 'Sandton Business Networking Breakfast',
     description: 'Connect with industry leaders in Sandton. A high-impact session for entrepreneurs and executives.',
     location: 'Sandton City, Johannesburg',
-    dateTime: '2024-05-22T07:30:00',
+    dateTime: '2025-10-22T07:30:00',
     category: 'Business' as const,
     organizer: 'Joburg Chamber of Commerce',
     organizerId: 'admin3',
@@ -44,7 +44,7 @@ export const MOCK_EVENTS = [
     title: 'Durban Beachfront Yoga',
     description: 'Morning flow on the Golden Mile. Start your Saturday with ocean breeze and mindfulness.',
     location: 'Golden Mile, Durban',
-    dateTime: '2024-05-18T06:30:00',
+    dateTime: '2026-01-18T06:30:00',
     category: 'Fitness' as const,
     organizer: 'Suncoast Yoga',
     organizerId: 'admin4',
@@ -52,10 +52,10 @@ export const MOCK_EVENTS = [
   },
   {
     id: '5',
-    title: 'Stellenbosch Wine & Food Festival',
+    title: 'Winelands Food & Wine Festival',
     description: 'Sample the finest cultivars and gourmet local cuisine in the heart of the Winelands.',
     location: 'Stellenbosch, Western Cape',
-    dateTime: '2024-06-01T11:00:00',
+    dateTime: '2025-11-01T11:00:00',
     category: 'Food' as const,
     organizer: 'Winelands Collective',
     organizerId: 'admin5',
@@ -63,13 +63,13 @@ export const MOCK_EVENTS = [
   },
   {
     id: '6',
-    title: 'Soweto Art Walk',
+    title: 'Soweto Heritage Art Walk',
     description: 'A guided tour through the vibrant street art and galleries of Vilakazi Street.',
     location: 'Orlando West, Soweto',
-    dateTime: '2024-05-26T10:00:00',
+    dateTime: '2025-12-16T10:00:00',
     category: 'Art' as const,
     organizer: 'Soweto Creative Hub',
     organizerId: 'admin6',
-    imageUrl: 'https://images.unsplash.com/photo-1460661419201-fd4ce186860d?auto=format&fit=crop&q=80&w=800'
+    imageUrl: 'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800'
   }
 ];

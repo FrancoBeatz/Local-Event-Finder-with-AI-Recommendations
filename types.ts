@@ -1,5 +1,7 @@
 
 export type Category = 'Tech' | 'Music' | 'Fitness' | 'Business' | 'Art' | 'Food' | 'Sports' | 'Hobbies';
+export type UserRole = 'user' | 'admin';
+export type EventStatus = 'approved' | 'flagged' | 'pending';
 
 export interface User {
   id: string;
@@ -9,6 +11,8 @@ export interface User {
   interests: Category[];
   savedEvents: string[]; // Event IDs
   interactions: UserInteraction[];
+  role: UserRole;
+  reminders: string[]; // Event IDs user wants reminders for
 }
 
 export interface UserInteraction {
@@ -27,6 +31,7 @@ export interface Event {
   organizer: string;
   imageUrl?: string;
   organizerId: string;
+  status?: EventStatus;
 }
 
 export interface Recommendation {
